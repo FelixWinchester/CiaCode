@@ -10,7 +10,7 @@ class Program
         Console.WriteLine("Введите второе число:");
         int b = Convert.ToInt32(Console.ReadLine());
 
-        Console.WriteLine("Введите второе число:");
+        Console.WriteLine("Введите третье число:");
         int c = Convert.ToInt32(Console.ReadLine());
 
         Console.WriteLine(a + "+" + b + "+" + c + "=" + (a + b + c));
