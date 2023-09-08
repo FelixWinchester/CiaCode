@@ -5,7 +5,7 @@ class Program {
     Console.WriteLine("Введите сумму вклада = ");
     double a = Convert.ToDouble(Console.ReadLine());
     
-    Console.WriteLine("Введите прицент по вкладу = ");
+    Console.WriteLine("Введите процент по вкладу = ");
     double b = Convert.ToDouble(Console.ReadLine());
     
     double c = a * (b/100);
