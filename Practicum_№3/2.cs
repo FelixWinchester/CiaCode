@@ -1,4 +1,3 @@
-// Доделать
 using System;
 
 class Task
@@ -10,13 +9,13 @@ class Task
         Console.Write("Введите второе число: ");
         int B = Convert.ToInt32(Console.ReadLine());
 
-        for (int i=A; i<B; i++)
+        for (int i = A; i < B; i++)
         {
-            if (i / 2 == 0)
+            if (i % 2 == 0)
             {
                 Console.Write($"{Math.Pow(i, 2)} ");
             }
-            
+
         }
     }
 }
