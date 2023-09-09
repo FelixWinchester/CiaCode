@@ -6,7 +6,7 @@ class Task
     {
         Console.Write("Введите первое число: ");
         int A = Convert.ToInt32(Console.ReadLine());
-        Console.WriteLine("Введите второе число: ");
+        Console.Write("Введите второе число: ");
         int B = Convert.ToInt32(Console.ReadLine());
 
         for (int i=A; i<B; i++)
