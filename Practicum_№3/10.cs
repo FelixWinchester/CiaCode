@@ -13,7 +13,7 @@ class Task
         {
             if (i % 3 == 0)
             {
-                Console.WriteLine(i);
+                Console.Write($"{i} ");
             }
         }
     }
