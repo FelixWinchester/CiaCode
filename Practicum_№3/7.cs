@@ -1,3 +1,4 @@
+// Переделать
 using System;
 
 class Task
