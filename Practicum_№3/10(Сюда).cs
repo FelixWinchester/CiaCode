@@ -11,7 +11,7 @@ class Task
 
         for (int i = A; i < B; i++)
         {
-            if (i % 2 == 0 && i % 3 == 0)
+            if (i % 6 == 0)
             {
                 Console.Write($"{i} ");
             }
