@@ -16,7 +16,7 @@ class Program
         if (n == 0)
         {
             Console.WriteLine(partition);
-            return;
+           
         }
 
         for (int i = Math.Min(max, n); i >= 1; i--)
@@ -25,4 +25,3 @@ class Program
         }
     }
 }
-
