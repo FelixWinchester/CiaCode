@@ -8,13 +8,16 @@ class Task
         int A = Convert.ToInt32(Console.ReadLine());
         Console.Write("Введите второе число: ");
         int B = Convert.ToInt32(Console.ReadLine());
-
-        for (int i = A; i < B; i++)
+        if (A % 2 == 1)
         {
-            if (i % 6 == 0)
+            A += 1;
+        }
+            for (int i = A; i < B; i += 2)
             {
-                Console.Write($"{i} ");
+                if (i % 3 == 0)
+                {
+                    Console.Write($"{i} ");
+                }
             }
         }
     }
-}
