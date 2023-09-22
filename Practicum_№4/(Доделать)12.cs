@@ -1,33 +1,47 @@
 using System;
 
-class Task
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        Console.Write("Введите первое число: ");
-        int a = Convert.ToInt32(Console.Read());
-        Console.Write("Введите второе число: ");
-        int b = Convert.ToInt32(Console.Read());
+        Console.Write("Введите число: ");
+        int number = Convert.ToInt32(Console.ReadLine());
 
-        for (int i =a; i<=b; i++)
+        if (IsPrime(number))
         {
-            if (i % 1 == 0 || i % i == 0)
-            {
-                Console.Write($"Число {i} является простым.");
-            }
-            else
-            {
+            Console.WriteLine($"{number} является простым числом.");
+        }
+        else
+        {
+            Console.WriteLine($"{number} не является простым числом. Его делители:");
+            PrintDivisors(number);
+        }
+    }
 
+    static bool IsPrime(int number)
+    {
+        if (number < 2)
+            return false;
+
+        for (int i = 2; i * i <= number; i++)
+        {
+            if (number % i == 0)
+                return false;
+        }
+
+        return true;
+    }
+
+    static void PrintDivisors(int number)
+    {
+        for (int i = 1; i * i <= number; i++)
+        {
+            if (number % i == 0)
+            {
+                Console.WriteLine(i);
+                if (i != number / i)
+                    Console.WriteLine(number / i);
             }
         }
-        
-
-
-
-
-
-
-
-
     }
 }
