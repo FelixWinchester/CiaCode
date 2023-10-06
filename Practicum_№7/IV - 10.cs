@@ -1,5 +1,3 @@
-// Для каждого столбца найти первый положительный элемент и записать данные в новый массив.
-
 using System;
 
 class Program
@@ -42,9 +40,20 @@ class Program
 
         // Вывод результатов
         Console.WriteLine("Результаты:");
+        Console.WriteLine("Массив с результатами:");
         for (int j = 0; j < n; j++)
         {
             Console.WriteLine($"Результат Массива[{j}]: {resultArray[j]}");
+        }
+
+        Console.WriteLine("Конечный массив:");
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                Console.Write($"{array[i, j]} ");
+            }
+            Console.WriteLine();
         }
     }
 }
