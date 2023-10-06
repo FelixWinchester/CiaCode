@@ -1,19 +1,23 @@
 using System;
 
+
 class Program
 {
     static void Main()
     {
+        // Ввод количества строк в массиве
         Console.Write("Введите количество строк в массиве: ");
         int rows = Convert.ToInt32(Console.ReadLine());
 
+        // Ввод количества столбцов в массиве
         Console.Write("Введите количество столбцов в массиве: ");
         int columns = Convert.ToInt32(Console.ReadLine());
 
+        // Создание двумерного массива
         int[,] array = new int[rows, columns];
 
+        // Ввод элементов массива
         Console.WriteLine("Введите элементы массива:");
-
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)
@@ -23,11 +27,14 @@ class Program
             }
         }
 
+        // Вывод введенного массива
         Console.WriteLine("Введенный массив:");
         PrintArray(array);
 
+        // Уплотнение массива
         int[,] compactedArray = CompactArray(array);
 
+        // Вывод уплотненного массива
         Console.WriteLine("Уплотненный массив:");
         PrintArray(compactedArray);
     }
@@ -40,7 +47,7 @@ class Program
         bool[] rowHasZeros = new bool[rows];
         bool[] columnHasZeros = new bool[columns];
 
-        // Check rows and columns for all zeros
+        // Проверка строк и столбцов на наличие нулей
         for (int i = 0; i < rows; i++)
         {
             bool allZeros = true;
@@ -69,7 +76,7 @@ class Program
             columnHasZeros[j] = allZeros;
         }
 
-        // Count non-zero rows and columns
+        // Подсчет количества ненулевых строк и столбцов
         int compactedRows = 0;
         int compactedColumns = 0;
 
@@ -89,7 +96,7 @@ class Program
             }
         }
 
-        // Create compacted array
+        // Создание уплотненного массива
         int[,] compactedArray = new int[compactedRows, compactedColumns];
         int compactedRowIndex = 0;
         int compactedColumnIndex = 0;
@@ -120,6 +127,7 @@ class Program
         int rows = array.GetLength(0);
         int columns = array.GetLength(1);
 
+        // Вывод массива на экран
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)
@@ -131,4 +139,3 @@ class Program
         Console.WriteLine();
     }
 }
-
