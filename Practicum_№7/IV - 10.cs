@@ -1,14 +1,22 @@
-using System;
-
 class Program
 {
     static void Main()
     {
-        // Ввод размера массива
+        int n = GetArraySize();
+        int[,] array = CreateAndFillArray(n);
+        int[] resultArray = FindPositiveElements(array, n);
+        PrintResults(resultArray, array, n);
+    }
+
+    static int GetArraySize()
+    {
         Console.Write("Введите размер массива n: ");
         int n = Convert.ToInt32(Console.ReadLine());
+        return n;
+    }
 
-        // Создание и заполнение исходного массива
+    static int[,] CreateAndFillArray(int n)
+    {
         int[,] array = new int[n, n];
         Console.WriteLine("Введите элементы массива:");
         for (int i = 0; i < n; i++)
@@ -19,11 +27,12 @@ class Program
                 array[i, j] = Convert.ToInt32(Console.ReadLine());
             }
         }
-
-        // Создание нового массива для хранения результатов
+        return array;
+    }
+    
+    static int[] FindPositiveElements(int[,] array, int n)
+    {
         int[] resultArray = new int[n];
-
-        // Нахождение первого положительного элемента для каждого столбца
         for (int j = 0; j < n; j++)
         {
             int positiveElement = 0;
@@ -37,8 +46,12 @@ class Program
             }
             resultArray[j] = positiveElement;
         }
+        return resultArray;
+    }
 
-        // Вывод результатов
+
+    static void PrintResults(int[] resultArray, int[,] array, int n)
+    {
         Console.WriteLine("Результаты:");
         Console.WriteLine("Массив с результатами:");
         for (int j = 0; j < n; j++)
