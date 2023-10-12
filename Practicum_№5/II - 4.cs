@@ -5,7 +5,7 @@ class Program
     static int SumOfDigits(int number)
     {
         int sum = 0;
-        while (number > 0)
+        while (number != 0)
         {
             sum += number % 10;
             number /= 10;
@@ -13,11 +13,20 @@ class Program
         return sum;
     }
 
+    static int FindClosestNumber(int A)
+    {
+        int closestNumber = A - 1;
+        int closestSum = SumOfDigits(closestNumber);
+        while (closestSum != SumOfDigits(A))
+        {
+            closestNumber--;
+            closestSum = SumOfDigits(closestNumber);
+        }
+        return closestNumber;
+    }
+
     static void Main()
     {
-        Console.Write("Введите число N: ");
-        int N = Convert.ToInt32(Console.ReadLine());
-
         Console.Write("Введите начало отрезка a: ");
         int a = Convert.ToInt32(Console.ReadLine());
 
@@ -25,55 +34,50 @@ class Program
         int b = Convert.ToInt32(Console.ReadLine());
 
         Console.Write("Введите значение C: ");
-        int C = Convert.ToInt32(Console.ReadLine());
-
-        Console.WriteLine("Сумма цифр числа N: " + SumOfDigits(N));
-
-        Console.WriteLine("Сумма цифр для каждого числа на отрезке [a, b]:");
-        for (int i = a; i <= b; i++)
-        {
-            Console.WriteLine($"Число: {i}, Сумма цифр: {SumOfDigits(i)}");
-        }
-
-        Console.WriteLine($"Числа на отрезке [a, b] с суммой цифр равной {C}:");
-        for (int i = a; i <= b; i++)
-        {
-            if (SumOfDigits(i) == C)
-            {
-                Console.WriteLine(i);
-            }
-        }
-
-        Console.WriteLine($"Числа на отрезке [a, b] с нечетной суммой цифр:");
-        for (int i = a; i <= b; i++)
-        {
-            if (SumOfDigits(i) % 2 != 0)
-            {
-                Console.WriteLine(i);
-            }
-        }
+        int c = Convert.ToInt32(Console.ReadLine());
 
         Console.Write("Введите число A: ");
         int A = Convert.ToInt32(Console.ReadLine());
 
-        int closestNumber = a;
-        int closestSum = SumOfDigits(a);
-
-        for (int i = a + 1; i <= b; i++)
+        // a) Вывод суммы цифр для каждого числа на отрезке [a, b]
+        Console.WriteLine("Суммы цифр для каждого числа на отрезке [a, b]:");
+        for (int i = a; i <= b; i++)
         {
-            int currentSum = SumOfDigits(i);
-            if (currentSum == SumOfDigits(A))
+            int sum = SumOfDigits(i);
+            Console.WriteLine($"Сумма цифр числа {i}: {sum}");
+        }
+
+        Console.WriteLine();
+
+        // b) Вывод чисел отрезка [a, b], у которых сумма цифр равна C
+        Console.WriteLine($"Числа отрезка [a, b], у которых сумма цифр равна {c}:");
+        for (int i = a; i <= b; i++)
+        {
+            int sum = SumOfDigits(i);
+            if (sum == c)
             {
-                closestNumber = i;
-                break;
-            }
-            else if (currentSum < SumOfDigits(A) && currentSum > closestSum)
-            {
-                closestNumber = i;
-                closestSum = currentSum;
+                Console.WriteLine(i);
             }
         }
 
-        Console.WriteLine($"Ближайшее предшествующее число к {A} с равной суммой цифр: {closestNumber}");
+        Console.WriteLine();
+
+        // c) Вывод чисел отрезка [a, b], у которых сумма цифр нечетная
+        Console.WriteLine($"Числа отрезка [a, b], у которых сумма цифр нечетная:");
+        for (int i = a; i <= b; i++)
+        {
+            int sum = SumOfDigits(i);
+            if (sum % 2 != 0)
+            {
+                Console.WriteLine(i);
+            }
+        }
+
+        Console.WriteLine();
+
+        // d) Вывод ближайшего предшествующего числа с такой же суммой цифр, как у числа A
+        Console.WriteLine($"Ближайшее предшествующее число к {A} с такой же суммой цифр:");
+        int closestNumber = FindClosestNumber(A);
+        Console.WriteLine(closestNumber);
     }
 }
