@@ -1,75 +1,50 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
-struct Employee
+using System.Linq;
+// Определение класса Employee с публичными свойствами
+public class Employee
 {
-    public string FullName;     // Полное имя сотрудника
-    public int HireYear;        // Год найма
-    public string Position;     // Должность
-    public decimal Salary;      // Зарплата
-    public int WorkExperience;  // Опыт работы
+    public string FullName { get; set; } // Имя
+    public int YearOfEmployment { get; set; } // Год
+    public string Position { get; set; } // Должность
+    public decimal Salary { get; set; } // Зарплата
+    public int WorkExperience { get; set; } // Опыт
 }
-
-// Определение класса Program
 class Program
 {
+    // Основной метод программы
     static void Main(string[] args)
     {
-        // Создание списка сотрудников
-        List<Employee> employees = new List<Employee>();
-
-        // Чтение данных из файла input.txt
-        string[] lines = File.ReadAllLines("input.txt");
-        foreach (string line in lines)
-        {
-            // Разделение строки на части по запятым
-            string[] parts = line.Split(',');
-
-            // Создание нового экземпляра сотрудника и заполнение его полей
-            Employee employee = new Employee
+        // Считывание данных из файла и создание списка сотрудников
+        List<Employee> employees = File.ReadAllLines("input.txt")
+            .Select(line => line.Split(','))
+            .Select(parts => new Employee
             {
                 FullName = parts[0],
-                HireYear = int.Parse(parts[1]),
+                YearOfEmployment = int.Parse(parts[1]),
                 Position = parts[2],
                 Salary = decimal.Parse(parts[3]),
                 WorkExperience = int.Parse(parts[4])
-            };
+            })
+            .ToList();
 
-            // Добавление сотрудника в список
-            employees.Add(employee);
-        }
+        // Группировка сотрудников по должности и сортировка
+        var groupedEmployees = employees.GroupBy(e => e.Position)
+            .OrderBy(g => g.Key)
+            .ToList();
 
-        // Группировка сотрудников по должности
-        Dictionary<string, List<Employee>> groupedEmployees = new Dictionary<string, List<Employee>>();
-        foreach (Employee employee in employees)
-        {
-            // Проверка наличия должности в словаре
-            if (!groupedEmployees.ContainsKey(employee.Position))
-            {
-                // Если должности нет, создание нового списка сотрудников
-                groupedEmployees[employee.Position] = new List<Employee>();
-            }
-
-            // Добавление сотрудника в список соответствующей должности
-            groupedEmployees[employee.Position].Add(employee);
-        }
-
-        // Запись результирующей информации в файл output.txt
+        // Создание и использование объекта StreamWriter для записи в файл
         using (StreamWriter writer = new StreamWriter("output.txt"))
         {
-            foreach (KeyValuePair<string, List<Employee>> group in groupedEmployees)
+            // Перебор групп сотрудников и запись информации о каждом в файл
+            foreach (var group in groupedEmployees)
             {
-                // Запись названия должности в файл
-                writer.WriteLine($"Должность: {group.Key}");
-
-                // Запись информации о каждом сотруднике в файл
-                foreach (Employee employee in group.Value)
+                writer.WriteLine($"Position: {group.Key}");
+                foreach (var employee in group)
                 {
-                    writer.WriteLine($"{employee.FullName}, {employee.HireYear}, {employee.Position}, {employee.Salary}, {employee.WorkExperience}");
+                    writer.WriteLine($"{employee.FullName}, {employee.YearOfEmployment}, {employee.Salary}, {employee.WorkExperience}");
                 }
-
-                // Добавление пустой строки для разделения групп сотрудников
                 writer.WriteLine();
             }
         }
