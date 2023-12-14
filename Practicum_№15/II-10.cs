@@ -2,59 +2,75 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-struct Employee // создание структуры Employee
+struct Employee
 {
-    public string FullName; // определение полей структуры Employee
-    public int HireYear;
-    public string Position;
-    public decimal Salary;
-    public int WorkExperience;
+    public string FullName;     // Полное имя сотрудника
+    public int HireYear;        // Год найма
+    public string Position;     // Должность
+    public decimal Salary;      // Зарплата
+    public int WorkExperience;  // Опыт работы
 }
 
-class Program // создание класса Program
+// Определение класса Program
+class Program
 {
-    static void Main(string[] args) // определение точки входа в программу
+    static void Main(string[] args)
     {
-        List<Employee> employees = new List<Employee>(); // создание списка сотрудников
+        // Создание списка сотрудников
+        List<Employee> employees = new List<Employee>();
 
         // Чтение данных из файла input.txt
-        string[] lines = File.ReadAllLines("input.txt"); // чтение всех строк из файла input.txt
-        foreach (string line in lines) // итерация по каждой строке
+        string[] lines = File.ReadAllLines("input.txt");
+        foreach (string line in lines)
         {
-            string[] parts = line.Split(','); // разделение строки на части
-            Employee employee = new Employee // создание нового сотрудника
+            // Разделение строки на части по запятым
+            string[] parts = line.Split(',');
+
+            // Создание нового экземпляра сотрудника и заполнение его полей
+            Employee employee = new Employee
             {
-                FullName = parts[0], // присвоение значений полям сотрудника
+                FullName = parts[0],
                 HireYear = int.Parse(parts[1]),
                 Position = parts[2],
                 Salary = decimal.Parse(parts[3]),
                 WorkExperience = int.Parse(parts[4])
             };
-            employees.Add(employee); // добавление сотрудника в список
+
+            // Добавление сотрудника в список
+            employees.Add(employee);
         }
 
         // Группировка сотрудников по должности
-        Dictionary<string, List<Employee>> groupedEmployees = new Dictionary<string, List<Employee>>(); // создание словаря для группировки сотрудников
-        foreach (Employee employee in employees) // итерация по каждому сотруднику
+        Dictionary<string, List<Employee>> groupedEmployees = new Dictionary<string, List<Employee>>();
+        foreach (Employee employee in employees)
         {
-            if (!groupedEmployees.ContainsKey(employee.Position)) // проверка наличия ключа в словаре
+            // Проверка наличия должности в словаре
+            if (!groupedEmployees.ContainsKey(employee.Position))
             {
-                groupedEmployees[employee.Position] = new List<Employee>(); // добавление нового ключа в словарь
+                // Если должности нет, создание нового списка сотрудников
+                groupedEmployees[employee.Position] = new List<Employee>();
             }
-            groupedEmployees[employee.Position].Add(employee); // добавление сотрудника в соответствующую группу
+
+            // Добавление сотрудника в список соответствующей должности
+            groupedEmployees[employee.Position].Add(employee);
         }
 
         // Запись результирующей информации в файл output.txt
-        using (StreamWriter writer = new StreamWriter("output.txt")) // открытие файла для записи
+        using (StreamWriter writer = new StreamWriter("output.txt"))
         {
-            foreach (KeyValuePair<string, List<Employee>> group in groupedEmployees) // итерация по каждой группе
+            foreach (KeyValuePair<string, List<Employee>> group in groupedEmployees)
             {
-                writer.WriteLine($"Должность: {group.Key}"); // запись названия должности
-                foreach (Employee employee in group.Value) // итерация по сотрудникам в группе
+                // Запись названия должности в файл
+                writer.WriteLine($"Должность: {group.Key}");
+
+                // Запись информации о каждом сотруднике в файл
+                foreach (Employee employee in group.Value)
                 {
-                    writer.WriteLine($"{employee.FullName}, {employee.HireYear}, {employee.Position}, {employee.Salary}, {employee.WorkExperience}"); // запись информации о сотруднике
+                    writer.WriteLine($"{employee.FullName}, {employee.HireYear}, {employee.Position}, {employee.Salary}, {employee.WorkExperience}");
                 }
-                writer.WriteLine(); // запись пустой строки для разделения групп
+
+                // Добавление пустой строки для разделения групп сотрудников
+                writer.WriteLine();
             }
         }
     }
