@@ -12,16 +12,17 @@ class Program
         // Преобразование строк в числа и фильтрация трехзначных чисел
         var threeDigitNumbers = numbers
             .Select(int.Parse)
-            .Where(n => n >= 100 && n <= 999);
+            .Where(n => (n >= -999 && n <= -100) || (n >= 100 && n <= 999)); // Только трехзначные числа
 
         // Вычисление результирующей последовательности чисел
         var result = threeDigitNumbers
-            .Select(n => n - 100);
+            .Select(n => n < 0 ? n + 100 : n - 100); // Увеличение отрицательных, уменьшение положительных
 
         // Запись результирующей последовательности чисел в файл
         File.WriteAllLines("output.txt", result.Select(n => n.ToString()));
     }
 }
+
 /* input.txt
 0 
 12 
