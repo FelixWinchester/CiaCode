@@ -5,80 +5,130 @@ class Program
     static void Main()
     {
         Console.Write("Введите размерность массива n: ");
-        if (int.TryParse(Console.ReadLine(), out int n) && n > 0)
-        {
-            int[,] originalArray = GenerateRandomArray(n);
-            Console.WriteLine("Исходный массив:");
-            PrintArray(originalArray);
+        int n = int.Parse(Console.ReadLine());
 
-            int[] firstPositiveElements = FindFirstPositiveElements(originalArray);
-            Console.WriteLine("\nПервые положительные элементы каждого столбца:");
-            PrintArray(firstPositiveElements);
-        }
-        else
-        {
-            Console.WriteLine("Некорректный ввод. Введите натуральное число больше 0.");
-        }
-    }
-
-    static int[,] GenerateRandomArray(int n)
-    {
-        int[,] array = new int[n, n];
-        Random random = new Random();
-
+        // Инициализация ступенчатого массива
+        int[][] array = new int[n][];
         for (int i = 0; i < n; i++)
         {
+            Console.WriteLine($"Введите элементы {i + 1}-й строки через пробел:");
+            string[] input = Console.ReadLine().Split(' ');
+            array[i] = new int[n];
             for (int j = 0; j < n; j++)
             {
-                array[i, j] = random.Next(-10, 11); // Заполняем случайными числами от -10 до 10
+                array[i][j] = int.Parse(input[j]);
             }
         }
 
-        return array;
+        Console.WriteLine("\nИсходный массив:");
+        PrintArray(array);
+
+        // Уплотнение массива
+        int[][] resultArray = CompactArray(array);
+
+        Console.WriteLine("\nРезультат уплотнения:");
+        PrintArray(resultArray);
     }
 
-    static void PrintArray(int[,] array)
+    static int[][] CompactArray(int[][] inputArray)
     {
-        int rows = array.GetLength(0);
-        int cols = array.GetLength(1);
+        int rowCount = inputArray.Length;
+        int colCount = inputArray[0].Length;
 
-        for (int i = 0; i < rows; i++)
+        // Флаги для определения, какие строки и столбцы нужно удалить
+        bool[] deleteRows = new bool[rowCount];
+        bool[] deleteCols = new bool[colCount];
+
+        // Проверка каждой строки на наличие ненулевых элементов
+        for (int i = 0; i < rowCount; i++)
         {
-            for (int j = 0; j < cols; j++)
+            for (int j = 0; j < colCount; j++)
             {
-                Console.Write(array[i, j] + "\t");
-            }
-            Console.WriteLine();
-        }
-    }
-
-    static void PrintArray(int[] array)
-    {
-        foreach (int element in array)
-        {
-            Console.Write(element + "\t");
-        }
-        Console.WriteLine();
-    }
-
-    static int[] FindFirstPositiveElements(int[,] array)
-    {
-        int rows = array.GetLength(0);
-        int cols = array.GetLength(1);
-        int[] firstPositiveElements = new int[cols];
-
-        for (int j = 0; j < cols; j++)
-        {
-            for (int i = 0; i < rows; i++)
-            {
-                if (array[i, j] >= 0) // Условие изменено, теперь 0 считается положительным
+                if (inputArray[i][j] != 0)
                 {
-                    firstPositiveElements[j] = array[i, j];
-                    break; // Найден положительный элемент, переходим к следующему столбцу
+                    // Если найден ненулевой элемент, то строку не удаляем
+                    deleteRows[i] = false;
+                    break;
+                }
+                else
+                {
+                    // Если строка состоит из одних нулей, то помечаем ее для удаления
+                    deleteRows[i] = true;
                 }
             }
         }
 
-        return firstPositiveElements;
+        // Проверка каждого столбца на наличие ненулевых элементов
+        for (int j = 0; j < colCount; j++)
+        {
+            for (int i = 0; i < rowCount; i++)
+            {
+                if (inputArray[i][j] != 0)
+                {
+                    // Если найден ненулевой элемент, то столбец не удаляем
+                    deleteCols[j] = false;
+                    break;
+                }
+                else
+                {
+                    // Если столбец состоит из одних нулей, то помечаем его для удаления
+                    deleteCols[j] = true;
+                }
+            }
+        }
+
+        // Создаем новый массив с учетом флагов удаления строк и столбцов
+        int newRowCount = rowCount - CountTrueValues(deleteRows);
+        int newColCount = colCount - CountTrueValues(deleteCols);
+
+        int[][] resultArray = new int[newRowCount][];
+        int rowIndex = 0;
+
+        for (int i = 0; i < rowCount; i++)
+        {
+            if (!deleteRows[i])
+            {
+                resultArray[rowIndex] = new int[newColCount];
+                int colIndex = 0;
+
+                for (int j = 0; j < colCount; j++)
+                {
+                    if (!deleteCols[j])
+                    {
+                        resultArray[rowIndex][colIndex] = inputArray[i][j];
+                        colIndex++;
+                    }
+                }
+
+                rowIndex++;
+            }
+        }
+
+        return resultArray;
+    }
+
+    static int CountTrueValues(bool[] array)
+    {
+        int count = 0;
+        foreach (bool value in array)
+        {
+            if (value)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    static void PrintArray(int[][] array)
+    {
+        foreach (var row in array)
+        {
+            foreach (var element in row)
+            {
+                Console.Write($"{element} ");
+            }
+            Console.WriteLine();
+        }
     }
 }
