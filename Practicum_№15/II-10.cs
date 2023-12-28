@@ -37,7 +37,6 @@ class Program
     static List<Employee> ReadEmployeesFromFile(string filePath)
     {
         List<Employee> employees = new List<Employee>();
-
             // Чтение строк из файла
             string[] lines = File.ReadAllLines(filePath);
 
@@ -55,8 +54,6 @@ class Program
                 };
                 employees.Add(employee);
             }
-        }
-
         return employees;
     }
 
@@ -86,8 +83,9 @@ class Program
                     writer.WriteLine(); // Пустая строка между группами
                 }
             }
-        }
     }
+}
+
 
 /*
 input.txt
