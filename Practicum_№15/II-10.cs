@@ -2,82 +2,121 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-// Определение класса Employee с публичными свойствами
-public class Employee
+
+// Структура для представления информации о сотруднике
+struct Employee
 {
-    public string FullName { get; set; } // Имя
-    public int YearOfEmployment { get; set; } // Год
-    public string Position { get; set; } // Должность
-    public decimal Salary { get; set; } // Зарплата
-    public int WorkExperience { get; set; } // Опыт
+    public string FullName;
+    public int HiringYear;
+    public string Position;
+    public double Salary;
+    public int Experience;
 }
+
 class Program
 {
-    // Основной метод программы
-    static void Main(string[] args)
+    static void Main()
     {
-        // Считывание данных из файла и создание списка сотрудников
-        List<Employee> employees = File.ReadAllLines("input.txt")
-            .Select(line => line.Split(','))
-            .Select(parts => new Employee
-            {
-                FullName = parts[0],
-                YearOfEmployment = int.Parse(parts[1]),
-                Position = parts[2],
-                Salary = decimal.Parse(parts[3]),
-                WorkExperience = int.Parse(parts[4])
-            })
-            .ToList();
+        // Путь к файлам ввода и вывода
+        string inputFile = "input.txt";
+        string outputFile = "output.txt";
 
-        // Группировка сотрудников по должности и сортировка
-        var groupedEmployees = employees.GroupBy(e => e.Position)
-            .OrderBy(g => g.Key)
-            .ToList();
+        // Чтение данных из файла
+        List<Employee> employees = ReadEmployeesFromFile(inputFile);
 
-        // Создание и использование объекта StreamWriter для записи в файл
-        using (StreamWriter writer = new StreamWriter("output.txt"))
+        // Группировка сотрудников по должности
+        var groupedByPosition = GroupEmployeesByPosition(employees);
+
+        // Вывод результатов в новый файл
+        WriteGroupedDataToFile(groupedByPosition, outputFile);
+
+        Console.WriteLine("Программа завершена. Результат записан в файл output.txt.");
+    }
+
+    // Метод для чтения данных из файла и создания списка сотрудников
+    static List<Employee> ReadEmployeesFromFile(string filePath)
+    {
+        List<Employee> employees = new List<Employee>();
+
+        try
         {
-            // Перебор групп сотрудников и запись информации о каждом в файл
-            foreach (var group in groupedEmployees)
+            // Чтение строк из файла
+            string[] lines = File.ReadAllLines(filePath);
+
+            // Обработка каждой строки и добавление сотрудника в список
+            foreach (string line in lines)
             {
-                writer.WriteLine($"Position: {group.Key}");
-                foreach (var employee in group)
+                string[] data = line.Split(';');
+                Employee employee = new Employee
                 {
-                    writer.WriteLine($"{employee.FullName}, {employee.YearOfEmployment}, {employee.Salary}, {employee.WorkExperience}");
+                    FullName = data[0],
+                    HiringYear = int.Parse(data[1]),
+                    Position = data[2],
+                    Salary = double.Parse(data[3]),
+                    Experience = int.Parse(data[4])
+                };
+                employees.Add(employee);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при чтении файла: {ex.Message}");
+        }
+
+        return employees;
+    }
+
+    // Метод для группировки сотрудников по должности
+    static Dictionary<string, List<Employee>> GroupEmployeesByPosition(List<Employee> employees)
+    {
+        // Группировка по должности с использованием LINQ
+        var groupedByPosition = employees.GroupBy(e => e.Position)
+                                         .ToDictionary(g => g.Key, g => g.ToList());
+
+        return groupedByPosition;
+    }
+
+    // Метод для записи результатов в новый файл
+    static void WriteGroupedDataToFile(Dictionary<string, List<Employee>> groupedData, string filePath)
+    {
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                // Запись группированных данных в файл
+                foreach (var group in groupedData)
+                {
+                    writer.WriteLine($"Должность: {group.Key}");
+                    foreach (var employee in group.Value)
+                    {
+                        writer.WriteLine($"ФИО: {employee.FullName}, Год принятия: {employee.HiringYear}, Зарплата: {employee.Salary}, Стаж: {employee.Experience}");
+                    }
+                    writer.WriteLine(); // Пустая строка между группами
                 }
-                writer.WriteLine();
             }
         }
     }
-}
-/* input.txt
-Иванов, Иван, Иваныч, 2000, инженер, 10000, 20
-Иванов, Иван, Иванович, 2006, менеджер, 20000, 14
-Петров, Петр, Петрович, 2007, менеджер, 21000, 13
-Петров, Петр, Петрович, 2001, инженер, 12000, 19
-Сидоров, Сидор, Сидорович, 2008, менеджер, 22000, 12
-Иванова, Мария, Ивановна, 2009, менеджер, 23000, 11
-Петрова, Анна, Петровна, 2010, менеджер, 24000, 10
-Иванова, Мария, Ивановна, 2003, инженер, 13000, 17
-Петрова, Анна, Петровна, 2004, инженер, 14000, 16
-Сидорова, Елена, Сидоровна, 2011, менеджер, 25000, 9
-Сидоров, Сидор, Сидорович, 2002, инженер, 11000, 18
-Сидорова, Елена, Сидоровна, 2005, инженер, 15000, 15
-*/
-/* output.txt
-Должность:  инженер
-Иванов  Иван  Иваныч, 2000,  инженер, 10000, 20
-Петров  Петр  Петрович, 2001,  инженер, 12000, 19
-Сидоров  Сидор  Сидорович, 2002,  инженер, 11000, 18
-Иванова  Мария  Ивановна, 2003,  инженер, 13000, 17
-Петрова  Анна  Петровна, 2004,  инженер, 14000, 16
-Сидорова  Елена  Сидоровна, 2005,  инженер, 15000, 15
 
-Должность:  менеджер
-Иванов  Иван  Иванович, 2006,  менеджер, 20000, 14
-Петров  Петр  Петрович, 2007,  менеджер, 21000, 13
-Сидоров  Сидор  Сидорович, 2008,  менеджер, 22000, 12
-Иванова  Мария  Ивановна, 2009,  менеджер, 23000, 11
-Петрова  Анна  Петровна, 2010,  менеджер, 24000, 10
-Сидорова  Елена  Сидоровна, 2011,  менеджер, 25000, 9
+/*
+input.txt
+
+Иванова Ольга Сергеевна;2012;Менеджер;48000;9
+Петрова Анна Игоревна;2016;Разработчик;62000;4
+Смирнова Мария Александровна;2013;Бухгалтер;54000;7
+Кузнецов Сергей Николаевич;2017;Менеджер;55000;5
+Васнецов Дмитрий Владимирович;2015;Разработчик;68000;6
+Козлов Николай Васильевич;2014;Бухгалтер;52000;8
+*/
+/*
+output.txt
+
+Должность: Менеджер
+ФИО: Иванова Ольга Сергеевна, Год принятия: 2012, Зарплата: 48000, Стаж: 9
+ФИО: Кузнецов Сергей Николаевич, Год принятия: 2017, Зарплата: 55000, Стаж: 5
+
+Должность: Разработчик
+ФИО: Петрова Анна Игоревна, Год принятия: 2016, Зарплата: 62000, Стаж: 4
+ФИО: Васнецов Дмитрий Владимирович, Год принятия: 2015, Зарплата: 68000, Стаж: 6
+
+Должность: Бухгалтер
+ФИО: Смирнова Мария Александровна, Год принятия: 2013, Зарплата: 54000, Стаж: 7
+ФИО: Козлов Николай Васильевич, Год принятия: 2014, Зарплата: 52000, Стаж: 8
 */
