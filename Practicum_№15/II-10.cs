@@ -38,8 +38,6 @@ class Program
     {
         List<Employee> employees = new List<Employee>();
 
-        try
-        {
             // Чтение строк из файла
             string[] lines = File.ReadAllLines(filePath);
 
@@ -57,10 +55,6 @@ class Program
                 };
                 employees.Add(employee);
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка при чтении файла: {ex.Message}");
         }
 
         return employees;
