@@ -1,93 +1,84 @@
-
 using System;
-using System.ComponentModel.Design;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.IO;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
+using System.IO;
 
-class Points
+public class SPoint
 {
-    public
-    struct SPoint
+    public double X { get; set; }
+    public double Y { get; set; }
+    public double Z { get; set; }
+
+    public SPoint(double x, double y, double z)
     {
-        public double x, y, z;
-        public SPoint(int x, int y, int z)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-        public void Show(StreamWriter fileout)
-        {
-            fileout.Write("{0}, {1}, {2}", x, y, z);
-        }
-        public double Distance(SPoint obj)
-        {
-            return Math.Pow(this.x - obj.x, 2) + Math.Pow(this.y - obj.y, 2) + Math.Pow(this.z - obj.z, 2);
-        }
+        X = x;
+        Y = y;
+        Z = z;
     }
-    static public SPoint[] Input(ref int n, ref double r)
+}
+
+public class Program
+{
+    public static double Distance(SPoint point1, SPoint point2)
     {
-        using (StreamReader fileIn = new StreamReader("input.txt"))
-        {
-            n = int.Parse(fileIn.ReadLine());
-            Console.WriteLine(n);
-            r = double.Parse(fileIn.ReadLine());
-            SPoint[] points = new SPoint[n];
-            for (int i = 0; i < n; i++)
-            {
-                string[] text = fileIn.ReadLine().Split(' ');
-                points[i] = new SPoint(int.Parse(text[0]), int.Parse(text[1]), int.Parse(text[2]));
-            }
-            return points;
-        }
+        return Math.Sqrt(Math.Pow(point1.X - point2.X, 2) + Math.Pow(point1.Y - point2.Y, 2) + Math.Pow(point1.Z - point2.Z, 2));
     }
 
-
-
-
-
-    static void Main()
+    public static Tuple<SPoint, int> FindMaxPoints(List<SPoint> points, double R)
     {
-        int n = 0;
-        double r = 0;
-        int c;
-        int max_point = 0;
-        int index = -1;
-        SPoint[] points = Input(ref n, ref r);
-        List<SPoint> max_points = new List<SPoint>();         
-        r *= r;
-        for (int i = 0; i < n; i++)
+        int maxCount = 0;
+        SPoint maxPoint = null;
+
+        foreach (SPoint point in points)
         {
-            c = 0;
-            for (int j = 0; j < n; j++)
+            int count = 0;
+            foreach (SPoint otherPoint in points)
             {
-                if (i == j) continue;
-                else
+                if (Distance(point, otherPoint) <= R)
                 {
-                    if (points[i].Distance(points[j]) <= r) c++;
+                    count++;
                 }
             }
-            if (c == max_point)
+            if (count > maxCount)
             {
-                max_points.Add(points[i]);
-            }
-            if (c > max_point)
-            {
-                max_point = c;
-                index = i;
-                max_points.Clear();
-                max_points.Add(points[i]);
+                maxCount = count;
+                maxPoint = point;
             }
         }
-        using (StreamWriter fileout = new StreamWriter("output.txt"))
-        {
-            if (max_point == 0) fileout.WriteLine("there is no such point");
-            else points[index].Show(fileout);
-        }
-        Console.WriteLine(max_point);
+
+        return new Tuple<SPoint, int>(maxPoint, maxCount);
     }
 
+    public static void Main()
+    {
+        // Чтение данных из файла
+        List<SPoint> points = new List<SPoint>();
+        using (StreamReader sr = new StreamReader("input.txt")) // Измените путь к файлу при необходимости
+        {
+            string line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                string[] coordinates = line.Split(' ');
+                double x = double.Parse(coordinates[0]);
+                double y = double.Parse(coordinates[1]);
+                double z = double.Parse(coordinates[2]);
+                points.Add(new SPoint(x, y, z));
+            }
+        }
+
+        // Радиус шара
+        double radius = 2.5;
+
+        // Найдем точку, содержащую максимальное количество точек
+        var result = FindMaxPoints(points, radius);
+        SPoint maxPoint = result.Item1;
+        int maxCount = result.Item2;
+
+        // Вывод результатов в файл
+        using (StreamWriter sw = new StreamWriter("output.txt")) // Измените путь к файлу при необходимости
+        {
+            sw.WriteLine($"Точка: ({maxPoint.X}, {maxPoint.Y}, {maxPoint.Z}) содержит {maxCount} точек внутри шара радиуса {radius}");
+        }
+
+        Console.WriteLine("Результаты записаны в output.txt");
+    }
 }
