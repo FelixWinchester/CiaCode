@@ -4,129 +4,117 @@ class Program
 {
     static void Main()
     {
-        Console.Write("Введите размерность массива n: ");
-        int n = int.Parse(Console.ReadLine());
+        Console.WriteLine("Введите размеры массива (через пробел):");
+        string[] dimensions = Console.ReadLine().Split();
+        int numRows = int.Parse(dimensions[0]);
+        int numCols = int.Parse(dimensions[1]);
 
-        // Инициализация ступенчатого массива
-        int[][] array = new int[n][];
-        for (int i = 0; i < n; i++)
+        int[,] originalArray = new int[numRows, numCols];
+
+        Console.WriteLine("Введите элементы массива построчно (через пробел):");
+        for (int i = 0; i < numRows; i++)
         {
-            Console.WriteLine($"Введите элементы {i + 1}-й строки через пробел:");
-            string[] input = Console.ReadLine().Split(' ');
-            array[i] = new int[n];
-            for (int j = 0; j < n; j++)
+            string[] rowElements = Console.ReadLine().Split();
+            for (int j = 0; j < numCols; j++)
             {
-                array[i][j] = int.Parse(input[j]);
+                originalArray[i, j] = int.Parse(rowElements[j]);
             }
         }
 
         Console.WriteLine("\nИсходный массив:");
-        PrintArray(array);
+        PrintArray(originalArray);
 
-        // Уплотнение массива
-        int[][] resultArray = CompactArray(array);
+        CompactArray(ref originalArray);
 
-        Console.WriteLine("\nРезультат уплотнения:");
-        PrintArray(resultArray);
+        Console.WriteLine("\nУплотненный массив (перезаписанный в исходном массиве):");
+        PrintArray(originalArray);
     }
 
-    static int[][] CompactArray(int[][] inputArray)
+    static void CompactArray(ref int[,] originalArray)
     {
-        int rowCount = inputArray.Length;
-        int colCount = inputArray[0].Length;
+        int numRows = originalArray.GetLength(0);
+        int numCols = originalArray.GetLength(1);
 
-        // Флаги для определения, какие строки и столбцы нужно удалить
-        bool[] deleteRows = new bool[rowCount];
-        bool[] deleteCols = new bool[colCount];
+        // Найти количество ненулевых строк и столбцов
+        int nonZeroRows = 0;
+        int nonZeroCols = 0;
 
-        // Проверка каждой строки на наличие ненулевых элементов
-        for (int i = 0; i < rowCount; i++)
+        for (int i = 0; i < numRows; i++)
         {
-            for (int j = 0; j < colCount; j++)
+            bool hasNonZero = false;
+            for (int j = 0; j < numCols; j++)
             {
-                if (inputArray[i][j] != 0)
+                if (originalArray[i, j] != 0)
                 {
-                    // Если найден ненулевой элемент, то строку не удаляем
-                    deleteRows[i] = false;
+                    hasNonZero = true;
                     break;
                 }
-                else
-                {
-                    // Если строка состоит из одних нулей, то помечаем ее для удаления
-                    deleteRows[i] = true;
-                }
+            }
+
+            if (hasNonZero)
+            {
+                nonZeroRows++;
             }
         }
 
-        // Проверка каждого столбца на наличие ненулевых элементов
-        for (int j = 0; j < colCount; j++)
+        for (int j = 0; j < numCols; j++)
         {
-            for (int i = 0; i < rowCount; i++)
+            bool hasNonZero = false;
+            for (int i = 0; i < numRows; i++)
             {
-                if (inputArray[i][j] != 0)
+                if (originalArray[i, j] != 0)
                 {
-                    // Если найден ненулевой элемент, то столбец не удаляем
-                    deleteCols[j] = false;
+                    hasNonZero = true;
                     break;
                 }
-                else
+            }
+
+            if (hasNonZero)
+            {
+                nonZeroCols++;
+            }
+        }
+
+        // Создать временный массив для перезаписи
+        int[,] tempArray = new int[nonZeroRows, nonZeroCols];
+        int tempRow = 0;
+        int tempCol = 0;
+
+        // Перезаписать ненулевые элементы во временный массив
+        for (int i = 0; i < numRows; i++)
+        {
+            bool hasNonZero = false;
+            for (int j = 0; j < numCols; j++)
+            {
+                if (originalArray[i, j] != 0)
                 {
-                    // Если столбец состоит из одних нулей, то помечаем его для удаления
-                    deleteCols[j] = true;
+                    hasNonZero = true;
+                    tempArray[tempRow, tempCol] = originalArray[i, j];
+                    tempCol++;
                 }
             }
-        }
 
-        // Создаем новый массив с учетом флагов удаления строк и столбцов
-        int newRowCount = rowCount - CountTrueValues(deleteRows);
-        int newColCount = colCount - CountTrueValues(deleteCols);
-
-        int[][] resultArray = new int[newRowCount][];
-        int rowIndex = 0;
-
-        for (int i = 0; i < rowCount; i++)
-        {
-            if (!deleteRows[i])
+            if (hasNonZero)
             {
-                resultArray[rowIndex] = new int[newColCount];
-                int colIndex = 0;
-
-                for (int j = 0; j < colCount; j++)
-                {
-                    if (!deleteCols[j])
-                    {
-                        resultArray[rowIndex][colIndex] = inputArray[i][j];
-                        colIndex++;
-                    }
-                }
-
-                rowIndex++;
+                tempRow++;
+                tempCol = 0;
             }
         }
 
-        return resultArray;
+        // Перезаписать временный массив в исходный
+        originalArray = tempArray;
     }
 
-    static int CountTrueValues(bool[] array)
+    static void PrintArray(int[,] array)
     {
-        int count = 0;
-        foreach (bool value in array)
-        {
-            if (value)
-            {
-                count++;
-            }
-        }
-        return count;
-    }
+        int numRows = array.GetLength(0);
+        int numCols = array.GetLength(1);
 
-    static void PrintArray(int[][] array)
-    {
-        foreach (var row in array)
+        for (int i = 0; i < numRows; i++)
         {
-            foreach (var element in row)
+            for (int j = 0; j < numCols; j++)
             {
-                Console.Write($"{element} ");
+                Console.Write(array[i, j] + " ");
             }
             Console.WriteLine();
         }
