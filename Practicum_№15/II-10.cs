@@ -3,86 +3,64 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-// Структура для представления информации о сотруднике
-struct Employee
-{
-    public string FullName;
-    public int HiringYear;
-    public string Position;
-    public double Salary;
-    public int Experience;
-}
-
 class Program
 {
+    public struct Stuff
+    {
+        public string Surname, Name, MiddleName, Post;
+        public int Year, Experience;
+        public double Salary;
+
+        public Stuff(string surname, string name, string middleName, string post, int year, int experience, double salary)
+        {
+            Surname = surname;
+            Name = name;
+            MiddleName = middleName;
+            Post = post;
+            Year = year;
+            Experience = experience;
+            Salary = salary;
+        }
+    }
+
+    static Stuff[] Input(ref int n)
+    {
+        using (StreamReader fileIn = new StreamReader("input.txt"))
+        {
+            n = int.Parse(fileIn.ReadLine());
+            Stuff[] stuffs = new Stuff[n];
+            for (int i = 0; i < n; i++)
+            {
+                string[] text = fileIn.ReadLine().Split(' ');
+                stuffs[i] = new Stuff(text[0], text[1], text[2], text[3], int.Parse(text[4]), int.Parse(text[5]), double.Parse(text[6]));
+            }
+            return stuffs;
+        }
+    }
+
     static void Main()
     {
-        // Путь к файлам ввода и вывода
-        string inputFile = "input.txt";
-        string outputFile = "output.txt";
+        int n = 0;
+        Stuff[] stuffs = Input(ref n);
 
-        // Чтение данных из файла
-        List<Employee> employees = ReadEmployeesFromFile(inputFile);
+        var query = stuffs.OrderBy(member => member.Post).GroupBy(member => member.Post);
 
-        // Группировка сотрудников по должности
-        var groupedByPosition = GroupEmployeesByPosition(employees);
-
-        // Вывод результатов в новый файл
-        WriteGroupedDataToFile(groupedByPosition, outputFile);
+        using (StreamWriter fileout = new StreamWriter("output.txt", false))
+        {
+            foreach (var group in query)
+            {
+                fileout.WriteLine($"{group.Key}:");
+                foreach (var member in group)
+                {
+                    fileout.WriteLine($"{member.Surname} {member.Name} {member.MiddleName}, " +
+                                      $"Год принятия: {member.Year}, Должность: {member.Post}, " +
+                                      $"Зарплата: {member.Salary}, Стаж: {member.Experience}");
+                }
+                fileout.WriteLine();
+            }
+        }
 
         Console.WriteLine("Программа завершена. Результат записан в файл output.txt.");
-    }
-
-    // Метод для чтения данных из файла и создания списка сотрудников
-    static List<Employee> ReadEmployeesFromFile(string filePath)
-    {
-        List<Employee> employees = new List<Employee>();
-            // Чтение строк из файла
-            string[] lines = File.ReadAllLines(filePath);
-
-            // Обработка каждой строки и добавление сотрудника в список
-            foreach (string line in lines)
-            {
-                string[] data = line.Split(';');
-                Employee employee = new Employee
-                {
-                    FullName = data[0],
-                    HiringYear = int.Parse(data[1]),
-                    Position = data[2],
-                    Salary = double.Parse(data[3]),
-                    Experience = int.Parse(data[4])
-                };
-                employees.Add(employee);
-            }
-        return employees;
-    }
-
-    // Метод для группировки сотрудников по должности
-    static Dictionary<string, List<Employee>> GroupEmployeesByPosition(List<Employee> employees)
-    {
-        // Группировка по должности с использованием LINQ
-        var groupedByPosition = employees.GroupBy(e => e.Position)
-                                         .ToDictionary(g => g.Key, g => g.ToList());
-
-        return groupedByPosition;
-    }
-
-    // Метод для записи результатов в новый файл
-    static void WriteGroupedDataToFile(Dictionary<string, List<Employee>> groupedData, string filePath)
-    {
-            using (StreamWriter writer = new StreamWriter(filePath))
-            {
-                // Запись группированных данных в файл
-                foreach (var group in groupedData)
-                {
-                    writer.WriteLine($"Должность: {group.Key}");
-                    foreach (var employee in group.Value)
-                    {
-                        writer.WriteLine($"ФИО: {employee.FullName}, Год принятия: {employee.HiringYear}, Зарплата: {employee.Salary}, Стаж: {employee.Experience}");
-                    }
-                    writer.WriteLine(); // Пустая строка между группами
-                }
-            }
     }
 }
 
@@ -90,25 +68,30 @@ class Program
 /*
 input.txt
 
-Иванова Ольга Сергеевна;2012;Менеджер;48000;9
-Петрова Анна Игоревна;2016;Разработчик;62000;4
-Смирнова Мария Александровна;2013;Бухгалтер;54000;7
-Кузнецов Сергей Николаевич;2017;Менеджер;55000;5
-Васнецов Дмитрий Владимирович;2015;Разработчик;68000;6
-Козлов Николай Васильевич;2014;Бухгалтер;52000;8
+5
+Smith John M Manager 2010 8 60000.0
+Johnson Mary A Accountant 2015 5 50000.0
+Williams James T Engineer 2018 3 70000.0
+Jones Linda K Analyst 2017 4 55000.0
+Miller Robert J Developer 2019 2 75000.0
+
 */
 /*
 output.txt
 
-Должность: Менеджер
-ФИО: Иванова Ольга Сергеевна, Год принятия: 2012, Зарплата: 48000, Стаж: 9
-ФИО: Кузнецов Сергей Николаевич, Год принятия: 2017, Зарплата: 55000, Стаж: 5
+Accountant:
+Johnson Mary A, Год принятия: 2015, Должность: Accountant, Зарплата: 50000, Стаж: 5
 
-Должность: Разработчик
-ФИО: Петрова Анна Игоревна, Год принятия: 2016, Зарплата: 62000, Стаж: 4
-ФИО: Васнецов Дмитрий Владимирович, Год принятия: 2015, Зарплата: 68000, Стаж: 6
+Analyst:
+Jones Linda K, Год принятия: 2017, Должность: Analyst, Зарплата: 55000, Стаж: 4
 
-Должность: Бухгалтер
-ФИО: Смирнова Мария Александровна, Год принятия: 2013, Зарплата: 54000, Стаж: 7
-ФИО: Козлов Николай Васильевич, Год принятия: 2014, Зарплата: 52000, Стаж: 8
+Developer:
+Miller Robert J, Год принятия: 2019, Должность: Developer, Зарплата: 75000, Стаж: 2
+
+Engineer:
+Williams James T, Год принятия: 2018, Должность: Engineer, Зарплата: 70000, Стаж: 3
+
+Manager:
+Smith John M, Год принятия: 2010, Должность: Manager, Зарплата: 60000, Стаж: 8
+
 */
