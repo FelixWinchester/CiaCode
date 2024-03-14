@@ -1,7 +1,48 @@
-using System; // Подключение пространства имен System для работы с базовыми классами и структурами .NET
-using System.IO; // Подключение пространства имен System.IO для работы с файловой системой
+// файл 1
+using System; 
+using System.IO; 
 
-public class Node
+
+namespace Prog{
+
+
+class Program
+{
+    static void Main()
+    {
+        string line = File.ReadAllText("input.txt");
+        string[] numbers = line.Split(' ');
+
+        BinarySearchTree tree = new BinarySearchTree(); // Создание объекта бинарного дерева
+
+        foreach (string lines in numbers) // Итерация по строкам файла
+{
+    if (int.TryParse(lines, out int value)) // Попытка преобразовать строку в целое число
+    {
+        tree.Insert(value); // Вставка числа в дерево
+    }
+    else
+    {
+        Console.WriteLine($"Invalid input: {lines}"); // Вывод сообщения об ошибке, если строка не удалось преобразовать в число
+    }
+}
+        try
+        {
+            int maxLeafValue = tree.FindMaxLeaf(); // Поиск максимального значения среди листьев дерева
+            Console.WriteLine($"Max value of leaf nodes: {maxLeafValue}"); // Вывод максимального значения
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine(ex.Message); // Обработка исключения при пустом дереве
+        }
+    }
+}
+}
+// файл 2
+using System;
+
+namespace Prog{
+   public class Node
 {
     public int Data; // Значение узла
     public Node Left, Right; // Ссылки на левого и правого потомка узла
@@ -68,38 +109,8 @@ public class BinarySearchTree
         return Math.Max(node.Data, Math.Max(maxLeft, maxRight)); // Возвращаем максимальное из трех значений
     }
 }
-
-class Program
-{
-    static void Main()
-    {
-        string[] lines = File.ReadAllLines("input.txt"); // Чтение строк из файла input.txt
-
-        BinarySearchTree tree = new BinarySearchTree(); // Создание объекта бинарного дерева
-
-        foreach (string line in lines) // Итерация по строкам файла
-        {
-            if (int.TryParse(line, out int value)) // Попытка преобразовать строку в целое число
-            {
-                tree.Insert(value); // Вставка числа в дерево
-            }
-            else
-            {
-                Console.WriteLine($"Invalid input: {line}"); // Вывод сообщения об ошибке, если строка не удалось преобразовать в число
-            }
-        }
-
-        try
-        {
-            int maxLeafValue = tree.FindMaxLeaf(); // Поиск максимального значения среди листьев дерева
-            Console.WriteLine($"Max value of leaf nodes: {maxLeafValue}"); // Вывод максимального значения
-        }
-        catch (InvalidOperationException ex)
-        {
-            Console.WriteLine(ex.Message); // Обработка исключения при пустом дереве
-        }
-    }
 }
+
 /*
 5
 3
