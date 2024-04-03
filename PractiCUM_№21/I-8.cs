@@ -1,124 +1,113 @@
-// файл 1
-using System; 
-using System.IO; 
-
-
-namespace Prog{
-
-
-class Program
-{
-    static void Main()
-    {
-        string line = File.ReadAllText("input.txt");
-        string[] numbers = line.Split(' ');
-
-        BinarySearchTree tree = new BinarySearchTree(); // Создание объекта бинарного дерева
-
-        foreach (string lines in numbers) // Итерация по строкам файла
-{
-    if (int.TryParse(lines, out int value)) // Попытка преобразовать строку в целое число
-    {
-        tree.Insert(value); // Вставка числа в дерево
-    }
-    else
-    {
-        Console.WriteLine($"Invalid input: {lines}"); // Вывод сообщения об ошибке, если строка не удалось преобразовать в число
-    }
-}
-        try
-        {
-            int maxLeafValue = tree.FindMaxLeaf(); // Поиск максимального значения среди листьев дерева
-            Console.WriteLine($"Max value of leaf nodes: {maxLeafValue}"); // Вывод максимального значения
-        }
-        catch (InvalidOperationException ex)
-        {
-            Console.WriteLine(ex.Message); // Обработка исключения при пустом дереве
-        }
-    }
-}
-}
-// файл 2
+// 1 файл - CLASS
 using System;
-
-namespace Prog{
-   public class Node
+using System.IO;
+namespace Programmy{
+public class Node
 {
-    public int Data; // Значение узла
-    public Node Left, Right; // Ссылки на левого и правого потомка узла
+    private int data;
+    private Node left;
+    private Node right;
 
-    public Node(int data) // Конструктор класса Node, принимает значение узла
+    public Node(int data)
     {
-        Data = data;
-        Left = Right = null; // Инициализация ссылок на потомков как null
+        this.data = data;
+        left = null;
+        right = null;
+    }
+
+    public int Data
+    {
+        get { return data; }
+        set { data = value; }
+    }
+
+    public Node Left
+    {
+        get { return left; }
+        set { left = value; }
+    }
+
+    public Node Right
+    {
+        get { return right; }
+        set { right = value; }
     }
 }
 
 public class BinarySearchTree
 {
-    public Node root; // Корневой узел дерева
+    private Node root;
 
-    public BinarySearchTree() // Конструктор класса BinarySearchTree
+    public BinarySearchTree()
     {
-        root = null; // Инициализация корневого узла как null
+        root = null;
     }
 
-    public void Insert(int data) // Метод вставки значения в дерево
+    public void Insert(int data)
     {
-        root = InsertRecursive(root, data); // Вызов рекурсивного метода вставки
+        root = InsertRec(root, data);
     }
 
-    private Node InsertRecursive(Node root, int data) // Рекурсивный метод вставки значения в дерево
+    private Node InsertRec(Node root, int data)
     {
-        if (root == null) // Если текущий узел пустой
+        if (root == null)
         {
-            root = new Node(data); // Создаем новый узел с переданным значением
+            root = new Node(data);
             return root;
         }
 
-        if (data < root.Data) // Если значение меньше значения текущего узла
-            root.Left = InsertRecursive(root.Left, data); // Рекурсивно вставляем значение в левое поддерево
-        else if (data > root.Data) // Если значение больше значения текущего узла
-            root.Right = InsertRecursive(root.Right, data); // Рекурсивно вставляем значение в правое поддерево
+        if (data < root.Data)
+            root.Left = InsertRec(root.Left, data);
+        else if (data > root.Data)
+            root.Right = InsertRec(root.Right, data);
 
-        return root; // Возвращаем корень поддерева
+        return root;
     }
 
-    public int FindMaxLeaf() // Метод для поиска максимального значения среди листьев дерева
+    public int FindLargestLeafValue()
     {
-        if (root == null) // Если дерево пустое
-            throw new InvalidOperationException("Tree is empty"); // Генерируем исключение
+        Node current = root;
 
-        return FindMaxLeafRecursive(root); // Вызов рекурсивного метода поиска максимального значения
+        while (current.Right != null)
+            current = current.Right;
+
+        return current.Data;
     }
+}
 
-    private int FindMaxLeafRecursive(Node node) // Рекурсивный метод поиска максимального значения среди листьев
+}
+
+// 2 файл - MAIN
+
+using System;
+using System.IO;
+namespace Programmy{
+public class Program
+{
+    public static void Main(string[] args)
     {
-        if (node.Left == null && node.Right == null) // Если текущий узел - лист
-            return node.Data; // Возвращаем его значение
+        BinarySearchTree bst = new BinarySearchTree();
 
-        int maxLeft = int.MinValue; // Переменная для хранения максимального значения в левом поддереве
-        int maxRight = int.MinValue; // Переменная для хранения максимального значения в правом поддереве
+        // Считываем последовательность целых чисел из файла input.txt
+        string[] lines = File.ReadAllLines("input.txt");
+        foreach (string line in lines)
+        {
+            string[] numbers = line.Split(' ');
+            foreach (string number in numbers)
+            {
+                int num;
+                if (int.TryParse(number, out num))
+                    bst.Insert(num);
+            }
+        }
 
-        if (node.Left != null) // Если есть левый потомок
-            maxLeft = FindMaxLeafRecursive(node.Left); // Рекурсивно ищем максимальное значение в левом поддереве
-
-        if (node.Right != null) // Если есть правый потомок
-            maxRight = FindMaxLeafRecursive(node.Right); // Рекурсивно ищем максимальное значение в правом поддереве
-
-        return Math.Max(node.Data, Math.Max(maxLeft, maxRight)); // Возвращаем максимальное из трех значений
+        // Находим наибольшее из значений листьев
+        int largestLeafValue = bst.FindLargestLeafValue();
+        Console.WriteLine("Наибольшее значение листьев: " + largestLeafValue);
     }
 }
 }
 
-/*
-5
-3
-88
-10
-4
-6
-9
-8
-100
-*/
+// Input
+
+// 8 83 7 13 57 64 13 11 5 3
