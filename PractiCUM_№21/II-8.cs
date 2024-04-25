@@ -1,97 +1,88 @@
-// 1 файл - Class
 using System;
 using System.IO;
-namespace Programmy{
+
 class Node
 {
-    public int Data { get; private set; }
-    public Node Left { get; private set; }
-    public Node Right { get; private set; }
+    private int data;
+    private Node left;
+    private Node right;
 
-    public Node(int data)
+    public Node(int value)
     {
-        Data = data;
-        Left = null;
-        Right = null;
+        data = value;
+        left = null;
+        right = null;
     }
 
     public void Insert(int value)
     {
-        if (value < Data)
+        if (value < data)
         {
-            if (Left == null)
-                Left = new Node(value);
+            if (left == null)
+                left = new Node(value);
             else
-                Left.Insert(value);
+                left.Insert(value);
         }
-        else if (value > Data)
-        {
-            if (Right == null)
-                Right = new Node(value);
-            else
-                Right.Insert(value);
-        }
-    }
-
-    public int Height()
-    {
-        if (Left == null && Right == null)
-            return 0;
-        else if (Left == null)
-            return 1 + Right.Height();
-        else if (Right == null)
-            return 1 + Left.Height();
         else
-            return 1 + Math.Max(Left.Height(), Right.Height());
+        {
+            if (right == null)
+                right = new Node(value);
+            else
+                right.Insert(value);
+        }
+    }
+
+    private int Height(Node node)
+    {
+        if (node == null)
+            return -1;
+        else
+        {
+            int leftHeight = Height(node.left);
+            int rightHeight = Height(node.right);
+
+            return Math.Max(leftHeight, rightHeight) + 1;
+        }
+    }
+
+    public void PrintHeights()
+    {
+        PrintHeightsRecursive(this);
+    }
+
+    private void PrintHeightsRecursive(Node node)
+    {
+        if (node != null)
+        {
+            PrintHeightsRecursive(node.left);
+            Console.WriteLine($"Node with data {node.data} has height {Height(node)}");
+            PrintHeightsRecursive(node.right);
+        }
     }
 }
-}
-// 2 файл - MAIN
-
-using System;
-using System.IO;
-
-namespace Programmy{
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Чтение чисел из файла
-        string[] lines = File.ReadAllLines("input.txt");
-        int[] numbers = Array.ConvertAll(lines[0].Split(' '), int.Parse);
+        // Чтение данных из файла
+        string input = File.ReadAllText("input.txt");
+        string[] numbers = input.Split(' ');
 
-        // Создание дерева бинарного поиска
-        Node root = new Node(numbers[0]);
-        for (int i = 1; i < numbers.Length; i++)
+        // Построение дерева бинарного поиска
+        Node root = null;
+        foreach (string number in numbers)
         {
-            root.Insert(numbers[i]);
+            int value = int.Parse(number);
+            if (root == null)
+                root = new Node(value);
+            else
+                root.Insert(value);
         }
 
-        // Вычисление высоты для каждого узла и вывод результатов
-        Console.WriteLine("Высота каждого узла в дереве:");
-        CalculateAndPrintHeight(root);
-
-        Console.ReadLine(); // Для удержания окна консоли открытым
-    }
-
-    static void CalculateAndPrintHeight(Node node, int level = 0)
-    {
-        if (node == null)
-            return;
-
-        if (node.Left != null || node.Right != null)
-        {
-            Console.WriteLine($"Узел {node.Data}: {level}");
-            CalculateAndPrintHeight(node.Left, level + 1);
-            CalculateAndPrintHeight(node.Right, level + 1);
-        }
-        else
-        {
-            Console.WriteLine($"Лист {node.Data}: Игнорируется");
-        }
+        // Вывод высот узлов дерева
+        root.PrintHeights();
     }
 }
-}
 
-// 8 83 7 13 57 64 23 11 5 3
+5 3 8 2 4 7 9 1 6 10 12 11 15 13 14
