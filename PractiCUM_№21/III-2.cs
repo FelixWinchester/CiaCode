@@ -1,157 +1,139 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 
-namespace Gagik
+class Node
 {
-    public class Program
+    public readonly int Data;
+    public Node Left { get; set; }
+    public Node Right { get; set; }
+
+    public Node(int data)
     {
-        public static void Main(string[] args)
-        {
-            // Чтение входного файла
-            string input = File.ReadAllText("input.txt");
-
-            // Разбиение входной строки на отдельные числа
-            string[] numbersAsString = input.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-            // Преобразование входных данных в список целых чисел
-            List<int> numbers = new List<int>();
-            foreach (string numStr in numbersAsString)
-            {
-                numbers.Add(int.Parse(numStr));
-            }
-
-            // Построение бинарного дерева поиска
-            BinarySearchTree tree = new BinarySearchTree();
-            foreach (int number in numbers)
-            {
-                tree.Insert(number);
-            }
-
-            // Проверка, является ли дерево идеально сбалансированным
-            bool isPerfectlyBalanced = tree.IsPerfectlyBalanced();
-
-            // Вывод результата
-            Console.WriteLine("Является ли дерево идеально сбалансированным?: " + isPerfectlyBalanced);
-        }
+        Data = data;
     }
 }
 
-------______________-----------
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace Gagik
+class Tree
 {
-    // Класс BinarySearchTree представляет бинарное дерево поиска
-    public class BinarySearchTree
+    public Node RootNode { get; private set; }
+
+    public void Add(int data)
     {
-        // Корневой узел дерева
-        public Node Root { get; set; }
-
-        // Метод вставки значения в дерево
-        public void Insert(int value)
+        Node newNode = new Node(data);
+        if (RootNode == null)
         {
-            // Если дерево пустое, создать корневой узел
-            if (Root == null)
+            RootNode = newNode;
+            return;
+        }
+
+        Node currentNode = RootNode;
+        while (true)
+        {
+            if (newNode.Data == currentNode.Data)
+                throw new Exception("Дерево не может содержать 2 одинаковых узла");
+            // Новый узел будет определен в левую часть дерева
+            else if (newNode.Data < currentNode.Data)
             {
-                Root = new Node(value);
+                if (currentNode.Left == null)
+                {
+                    currentNode.Left = newNode;
+                    return;
+                }
+                currentNode = currentNode.Left;
             }
+            // Новый узел будет определен в правую часть дерева
             else
             {
-                // Вставка значения в соответствующее поддерево
-                Insert(Root, value);
-            }
-        }
-
-        // Рекурсивный метод вставки значения в поддерево
-        private void Insert(Node node, int value)
-        {
-            // Если значение меньше, чем узел, и нет левого поддерева, создать новый узел слева
-            if (value < node.Value)
-            {
-                if (node.Left == null)
+                if (currentNode.Right == null)
                 {
-                    node.Left = new Node(value);
+                    currentNode.Right = newNode;
+                    return;
                 }
-                else
-                {
-                    // Рекурсивно вставить значение в левое поддерево
-                    Insert(node.Left, value);
-                }
+                currentNode = currentNode.Right;
             }
-            else
-            {
-                // Если значение больше или равно узлу и нет правого поддерева, создать новый узел справа
-                if (node.Right == null)
-                {
-                    node.Right = new Node(value);
-                }
-                else
-                {
-                    // Рекурсивно вставить значение в правое поддерево
-                    Insert(node.Right, value);
-                }
-            }
-        }
-
-        // Метод проверки сбалансированности дерева
-        public bool IsPerfectlyBalanced()
-        {
-            return IsPerfectlyBalanced(Root);
-        }
-
-        // Рекурсивный метод проверки сбалансированности поддерева
-        private bool IsPerfectlyBalanced(Node node)
-        {
-            // Если узел пустой, он считается сбалансированным
-            if (node == null)
-            {
-                return true;
-            }
-
-            // Вычисление высот левого и правого поддеревьев
-            int leftHeight = GetHeight(node.Left);
-            int rightHeight = GetHeight(node.Right);
-
-            // Проверка сбалансированности и рекурсивная проверка для левого и правого поддеревьев
-            return Math.Abs(leftHeight - rightHeight) <= 1 &&
-                IsPerfectlyBalanced(node.Left) &&
-                IsPerfectlyBalanced(node.Right);
-        }
-
-        // Метод вычисления высоты поддерева
-        private int GetHeight(Node node)
-        {
-            // Если узел пустой, высота равна 0
-            if (node == null)
-            {
-                return 0;
-            }
-
-            // Рекурсивно вычислить высоту левого и правого поддеревьев и вернуть максимум плюс один
-            return 1 + Math.Max(GetHeight(node.Left), GetHeight(node.Right));
         }
     }
 
-    // Класс Node представляет узел в бинарном дереве поиска
-    public class Node
+    // Проверка идеальной сбалансированности дерева
+    public bool IsBalanced()
     {
-        // Значение узла
-        public int Value { get; set; }
-        
-        // Левое и правое поддеревья
-        public Node Left { get; set; }
-        public Node Right { get; set; }
+        return CheckBalance(RootNode) != -1;
+    }
 
-        // Конструктор узла с заданным значением
-        public Node(int value)
-        {
-            Value = value;
-        }
+    // Рекурсивная функция для проверки баланса
+    private int CheckBalance(Node node)
+    {
+        if (node == null)
+            return 0;
+
+        // Рекурсивно получаем высоту левого поддерева
+        int leftHeight = CheckBalance(node.Left);
+        if (leftHeight == -1)
+            return -1; // Несбалансированное поддерево, прерываем проверку
+
+        // Рекурсивно получаем высоту правого поддерева
+        int rightHeight = CheckBalance(node.Right);
+        if (rightHeight == -1)
+            return -1; // Несбалансированное поддерево, прерываем проверку
+
+        // Проверяем, сбалансировано ли текущее поддерево
+        if (Math.Abs(leftHeight - rightHeight) > 1)
+            return -1; // Несбалансированное поддерево
+
+        // Возвращаем высоту текущего поддерева
+        return Math.Max(leftHeight, rightHeight) + 1;
     }
 }
 
-15 7 23 3 11 18 26 1 5 9 13 17 21 25 29 2 4 6 8 10 112 
+class Program
+{
+    static void Main()
+    {
+        // Путь к файлу
+        string filePath = "input.txt";
+
+        // Проверка наличия файла
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine("Файл не найден");
+            return;
+        }
+
+        // Создание экземпляра дерева
+        Tree tree = new Tree();
+
+        // Чтение данных из файла и добавление их в дерево
+        try
+        {
+            string[] values = File.ReadAllText(filePath).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string value in values)
+            {
+                int num;
+                if (int.TryParse(value, out num))
+                {
+                    tree.Add(num);
+                }
+                else
+                {
+                    Console.WriteLine($"Ошибка чтения данных из файла: Некорректное значение \"{value}\"");
+                    return;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка чтения данных из файла: {ex.Message}");
+            return;
+        }
+
+        // Проверка на идеальную сбалансированность дерева
+        if (tree.IsBalanced())
+            Console.WriteLine("Дерево идеально сбалансировано");
+        else
+            Console.WriteLine("Дерево не является идеально сбалансированным");
+
+        Console.ReadKey();
+    }
+}
+
+50 25 75 10 40 60 80 5 15 30 45 55 70 85
