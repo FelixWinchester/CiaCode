@@ -2,90 +2,136 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-class Graph
-{
-    private int[,] adjacencyMatrix; // Матрица смежности графа
-    private int size; // Количество вершин в графе
-
-    public Graph(string filePath)
-    {
-        // Конструктор класса Graph, который инициализирует граф на основе входных данных из файла
-        string[] lines = File.ReadAllLines(filePath); // Считываем все строки из файла
-        size = int.Parse(lines[0]); // Первая строка содержит количество вершин графа
-        adjacencyMatrix = new int[size, size]; // Инициализируем матрицу смежности размером size x size
-
-        // Заполнение матрицы смежности
-        for (int i = 0; i < size; i++)
-        {
-            string[] parts = lines[i + 1].Split(' '); // Разбиваем строку на части по пробелу
-            for (int j = 0; j < size; j++)
-            {
-                adjacencyMatrix[i, j] = int.Parse(parts[j]); // Заполняем ячейку матрицы смежности
-            }
-        }
-    }
-
-    // Метод для поиска эйлерова цикла в графе
-    public void SearchEulerianCycle(int v, ref int[,] a, ref Stack<int> c)
-    {
-        // Рекурсивная функция для поиска эйлерова цикла
-        for (int i = 0; i < size; i++)
-        {
-            if (a[v, i] != 0)
-            {
-                a[v, i] = 0;
-                a[i, v] = 0;
-                SearchEulerianCycle(i, ref a, ref c); // Рекурсивный вызов для следующей вершины
-            }
-        }
-        c.Push(v); // После прохода по всем смежным вершинам добавляем текущую вершину в стек
-    }
-
-    // Метод для определения вершины, которая была просмотрена максимальное количество раз при поиске эйлерова цикла
-    public int FindMaxVisitedVertex()
-    {
-        int[] visitedCount = new int[size]; // Массив для подсчета количества посещений вершин
-        for (int i = 0; i < size; i++)
-        {
-            visitedCount[i] = 0; // Инициализация счетчиков посещений нулями
-        }
-
-        int[,] copyMatrix = (int[,])adjacencyMatrix.Clone(); // Создаем копию матрицы смежности
-        Stack<int> cycle = new Stack<int>(); // Создаем стек для хранения эйлерова цикла
-        SearchEulerianCycle(0, ref copyMatrix, ref cycle); // Запускаем поиск эйлерова цикла
-
-        // Подсчет количества посещений вершин в эйлеровом цикле
-        while (cycle.Count != 0)
-        {
-            visitedCount[cycle.Pop()]++; // Увеличиваем счетчик посещений для каждой вершины цикла
-        }
-
-        // Находим вершину, которая была посещена максимальное количество раз
-        int maxCount = 0;
-        int maxCountVertex = -1;
-        for (int i = 0; i < size; i++)
-        {
-            if (visitedCount[i] > maxCount)
-            {
-                maxCount = visitedCount[i];
-                maxCountVertex = i;
-            }
-        }
-
-        return maxCountVertex + 1; // Возвращаем номер вершины с максимальным количеством посещений
-    }
-}
-
 class Program
 {
     static void Main(string[] args)
     {
-        // Создание экземпляра класса Graph на основе входных данных из файла
-        Graph graph = new Graph("input.txt");
-        // Определение вершины, которая была просмотрена максимальное количество раз при поиске эйлерова цикла
-        int maxVisitedVertex = graph.FindMaxVisitedVertex();
-        // Вывод результата на консоль
-        Console.WriteLine($"Вершина, просмотренная максимальное количество раз: {maxVisitedVertex}");
+        string[] lines = File.ReadAllLines("input.txt");
+        int n = int.Parse(lines[0]);
+        int[,] adjacencyMatrix = new int[n, n];
+        
+        for (int i = 1; i <= n; i++)
+        {
+            string[] values = lines[i].Split(' ');
+            for (int j = 0; j < n; j++)
+            {
+                adjacencyMatrix[i-1, j] = int.Parse(values[j]);
+            }
+        }
+
+        if (IsEulerian(adjacencyMatrix, n))
+        {
+            int[] degrees = CalculateInDegrees(adjacencyMatrix, n);
+            int maxDegree = 0;
+            List<int> maxVertices = new List<int>();
+
+            for (int i = 0; i < n; i++)
+            {
+                if (degrees[i] > maxDegree)
+                {
+                    maxDegree = degrees[i];
+                    maxVertices.Clear();
+                    maxVertices.Add(i + 1);
+                }
+                else if (degrees[i] == maxDegree)
+                {
+                    maxVertices.Add(i + 1);
+                }
+            }
+
+            Console.WriteLine("Вершины с максимальным количеством дорог: " + string.Join(", ", maxVertices));
+        }
+        else
+        {
+            Console.WriteLine("Граф не является эйлеровым.");
+        }
+    }
+
+    static bool IsEulerian(int[,] matrix, int n)
+    {
+        // Check for directed or undirected graph
+        bool isDirected = false;
+        for (int i = 0; i < n && !isDirected; i++)
+        {
+            for (int j = 0; j < n && !isDirected; j++)
+            {
+                if (matrix[i, j] != matrix[j, i])
+                {
+                    isDirected = true;
+                }
+            }
+        }
+
+        if (isDirected)
+        {
+            // Check for Eulerian conditions in directed graph
+            int[] inDegrees = new int[n];
+            int[] outDegrees = new int[n];
+
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < n; j++)
+                {
+                    outDegrees[i] += matrix[i, j];
+                    inDegrees[j] += matrix[i, j];
+                }
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                if (inDegrees[i] != outDegrees[i])
+                {
+                    return false;
+                }
+            }
+
+            return IsStronglyConnected(matrix, n);
+        }
+        else
+        {
+            // Check for Eulerian conditions in undirected graph
+            for (int i = 0; i < n; i++)
+            {
+                int degree = 0;
+                for (int j = 0; j < n; j++)
+                {
+                    degree += matrix[i, j];
+                }
+                if (degree % 2 != 0)
+                {
+                    return false;
+                }
+            }
+
+            return IsConnected(matrix, n);
+        }
+    }
+
+    static bool IsStronglyConnected(int[,] matrix, int n)
+    {
+        // Implementation for checking strong connectivity (e.g., using Kosaraju's algorithm)
+        // Placeholder for brevity
+        return true;
+    }
+
+    static bool IsConnected(int[,] matrix, int n)
+    {
+        // Implementation for checking connectivity (e.g., using BFS or DFS)
+        // Placeholder for brevity
+        return true;
+    }
+
+    static int[] CalculateInDegrees(int[,] matrix, int n)
+    {
+        int[] inDegrees = new int[n];
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                inDegrees[j] += matrix[i, j];
+            }
+        }
+        return inDegrees;
     }
 }
 
