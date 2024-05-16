@@ -1,139 +1,195 @@
 using System;
 using System.IO;
+using Test;
 
-class Node
+namespace ConsoleApp1
 {
-    public readonly int Data;
-    public Node Left { get; set; }
-    public Node Right { get; set; }
-
-    public Node(int data)
+    internal class MainProgramm
     {
-        Data = data;
+        static void Main()
+        {
+            using (StreamReader fileIn = new StreamReader("input.txt"))
+            {
+                BinaryTree tree = new BinaryTree();
+                string line = fileIn.ReadToEnd();
+                string[] data = line.Split(' ');
+                foreach (string item in data)
+                {
+                    tree.Add(int.Parse(item));
+                }
+                tree.Preorder();
+                Console.WriteLine();
+                tree.F();
+            }
+        }
     }
 }
 
-class Tree
-{
-    public Node RootNode { get; private set; }
+________________________________
 
-    public void Add(int data)
+using System;
+
+namespace Test
+{
+    internal class Node
     {
-        Node newNode = new Node(data);
-        if (RootNode == null)
+        public int inf;
+        public int leftcount;
+        public int rightcount;
+        public Node left;
+        public Node right;
+
+        public Node(int nodeInf)
         {
-            RootNode = newNode;
-            return;
+            inf = nodeInf;
+            leftcount = 0;
+            rightcount = 0;
+            left = null;
+            right = null;
         }
 
-        Node currentNode = RootNode;
-        while (true)
+        public static void Add(ref Node r, int nodeInf)
         {
-            if (newNode.Data == currentNode.Data)
-                throw new Exception("Дерево не может содержать 2 одинаковых узла");
-            // Новый узел будет определен в левую часть дерева
-            else if (newNode.Data < currentNode.Data)
+            if (r == null)
             {
-                if (currentNode.Left == null)
-                {
-                    currentNode.Left = newNode;
-                    return;
-                }
-                currentNode = currentNode.Left;
+                r = new Node(nodeInf);
             }
-            // Новый узел будет определен в правую часть дерева
             else
             {
-                if (currentNode.Right == null)
+                if (((IComparable)(r.inf)).CompareTo(nodeInf) > 0)
                 {
-                    currentNode.Right = newNode;
-                    return;
-                }
-                currentNode = currentNode.Right;
-            }
-        }
-    }
-
-    // Проверка идеальной сбалансированности дерева
-    public bool IsBalanced()
-    {
-        return CheckBalance(RootNode) != -1;
-    }
-
-    // Рекурсивная функция для проверки баланса
-    private int CheckBalance(Node node)
-    {
-        if (node == null)
-            return 0;
-
-        // Рекурсивно получаем высоту левого поддерева
-        int leftHeight = CheckBalance(node.Left);
-        if (leftHeight == -1)
-            return -1; // Несбалансированное поддерево, прерываем проверку
-
-        // Рекурсивно получаем высоту правого поддерева
-        int rightHeight = CheckBalance(node.Right);
-        if (rightHeight == -1)
-            return -1; // Несбалансированное поддерево, прерываем проверку
-
-        // Проверяем, сбалансировано ли текущее поддерево
-        if (Math.Abs(leftHeight - rightHeight) > 1)
-            return -1; // Несбалансированное поддерево
-
-        // Возвращаем высоту текущего поддерева
-        return Math.Max(leftHeight, rightHeight) + 1;
-    }
-}
-
-class Program
-{
-    static void Main()
-    {
-        // Путь к файлу
-        string filePath = "input.txt";
-
-        // Проверка наличия файла
-        if (!File.Exists(filePath))
-        {
-            Console.WriteLine("Файл не найден");
-            return;
-        }
-
-        // Создание экземпляра дерева
-        Tree tree = new Tree();
-
-        // Чтение данных из файла и добавление их в дерево
-        try
-        {
-            string[] values = File.ReadAllText(filePath).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string value in values)
-            {
-                int num;
-                if (int.TryParse(value, out num))
-                {
-                    tree.Add(num);
+                    r.leftcount++;
+                    Add(ref r.left, nodeInf);
                 }
                 else
                 {
-                    Console.WriteLine($"Ошибка чтения данных из файла: Некорректное значение \"{value}\"");
-                    return;
+                    r.rightcount++;
+                    Add(ref r.right, nodeInf);
                 }
             }
         }
-        catch (Exception ex)
+
+        public static void Proverka(Node t, ref bool flag, int Schet)
         {
-            Console.WriteLine($"Ошибка чтения данных из файла: {ex.Message}");
-            return;
+            if (Schet == 1)
+            {
+                if (t != null)
+                {
+                    if (Math.Abs(t.leftcount - t.rightcount) > 2)
+                    {
+                        flag = false;
+                    }
+                    Proverka(t.left, ref flag, Schet);
+                    Proverka(t.right, ref flag, Schet);
+                }
+            }
+            if (Schet == 2)
+            {
+                if (t != null)
+                {
+                    Proverka(t.left, ref flag, Schet);
+                    Proverka(t.right, ref flag, Schet);
+                    if (Math.Abs(t.leftcount - t.rightcount) >= 2)
+                    {
+                        flag = false;
+                    }
+                }
+            }
         }
 
-        // Проверка на идеальную сбалансированность дерева
-        if (tree.IsBalanced())
-            Console.WriteLine("Дерево идеально сбалансировано");
-        else
-            Console.WriteLine("Дерево не является идеально сбалансированным");
+        public static void Count(Node t, ref int counter)
+        {
+            if (t != null)
+            {
+                if (Math.Abs(t.leftcount - t.rightcount) == 2)
+                {
+                    counter++;
+                }
+                Count(t.left, ref counter);
+                Count(t.right, ref counter);
+            }
+        }
 
-        Console.ReadKey();
+        public static void F(Node t, ref bool flag, ref int counter)
+        {
+            int Schet = 1;
+            Proverka(t, ref flag, Schet);
+            if (flag)
+            {
+                Count(t, ref counter);
+                if (counter > 1)
+                {
+                    flag = false;
+                }
+                else
+                {
+                    Schet = 2;
+                    Proverka(t, ref flag, Schet);
+                }
+            }
+        }
+
+        public static void Preorder(Node r)
+        {
+            if (r != null)
+            {
+                Console.Write("{0} ", r.inf);
+                Preorder(r.left);
+                Preorder(r.right);
+            }
+        }
     }
 }
 
-50 25 75 10 40 60 80 5 15 30 45 55 70 85
+______________________________________________
+
+using System;
+
+namespace Test
+{
+    internal class BinaryTree
+    {
+        Node tree;
+
+        public int Root
+        {
+            set { tree.inf = value; }
+            get { return tree.inf; }
+        }
+
+        public BinaryTree()
+        {
+            tree = null;
+        }
+
+        private BinaryTree(Node r)
+        {
+            tree = r;
+        }
+
+        public void Add(int nodeInf)
+        {
+            Node.Add(ref tree, nodeInf);
+        }
+
+        public void F()
+        {
+            int counter = 0;
+            bool flag = true;
+            Node.F(tree, ref flag, ref counter);
+            if (flag)
+            {
+                Console.WriteLine("Дерево можно сделать идеально сбалансированным");
+            }
+            else
+            {
+                Console.WriteLine("Дерево нельзя идеально сбалансировать");
+            }
+        }
+
+        public void Preorder()
+        {
+            Node.Preorder(tree);
+        }
+    }
+}
